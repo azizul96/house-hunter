@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { Toaster } from 'react-hot-toast';
+import Dashboard from './Layout/Dashboard';
+import AddHome from './pages/Dashboard/AddHome';
 
 
 const router = createBrowserRouter([
@@ -30,6 +32,16 @@ const router = createBrowserRouter([
 
     ]
   },
+  {
+    path: "dashboard",
+    element: <Dashboard></Dashboard>,
+    children: [
+      {
+        path: "add-house",
+        element: <AddHome></AddHome>
+      },
+    ]
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -28,6 +28,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const userCollection = client.db("houseHunterDB").collection("users");
+    const houseCollection = client.db("houseHunterDB").collection("house");
 
     // middleware
     const verifyToken = (req, res, next) => {
@@ -53,6 +54,19 @@ async function run() {
         });
         res.send({ token });
     });
+
+    // house
+    app.get('/house', async(req, res)=>{
+      const result = await houseCollection.find().toArray()
+      res.send(result)
+    })
+    
+    app.post('/house', async(req, res)=>{
+      const house = req.body
+      const result = await houseCollection.insertOne(house)
+      res.send(result)
+    })
+    
 
     
 
