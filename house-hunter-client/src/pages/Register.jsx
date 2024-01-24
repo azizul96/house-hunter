@@ -1,11 +1,16 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
+import useAxiosPublic from "../Hooks/useAxiosPublic";
+import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthProvider";
 
 
 const Register = () => {
-    // const navigate = useNavigate(null)
+    const navigate = useNavigate(null)
     const [showPass, setShowPass] = useState(false)
+    const { createUser } = useContext(AuthContext)
+    const axiosPublic = useAxiosPublic()
 
     const handleRegistration = e =>{
         e.preventDefault()
@@ -15,17 +20,35 @@ const Register = () => {
         const email = e.target.email.value
         const password = e.target.password.value
         console.log(name, role, number, email, password);
+        const userInfo = {
+            name,
+            role,
+            number,
+            email,
+            password,
+        }
 
-        // if(password.length < 6){
-        //     return toast.error('Password must be 6 characters long ');
-        // }
-        // else if(!/[A-Z]/.test(password)){
-        //     return toast.error('Password should have one uppercase character');
-        // }
-        // else if(!/[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password)){
-        //     return toast.error('Password should have one special character');
-        // }
-
+        createUser(email, password)
+        .then(()=>{
+            axiosPublic.post('/users', userInfo)
+            .then(res => {
+                if(res.data.error){
+                    toast.error('User Exists');
+                }
+                if(res.data.insertedId){
+                    toast.success('Register Successfully');
+                    if(role === "owner"){
+                        navigate("/dashboard/owner")
+                    }else{
+                        navigate("/dashboard/renter")
+                    } 
+                }
+            })
+            .catch(error =>{
+                toast.error(error.message);
+            })
+        })
+        
     }
     return (
         <div>
@@ -51,8 +74,8 @@ const Register = () => {
                                 </label>
                                 <select className="select select-bordered w-full max-w-xs" name='role' required >
                                     <option disabled value="" >Your Role ?</option>
-                                    <option value="house owner">House Owner</option>
-                                    <option value="house renter">House Renter</option>
+                                    <option value="owner">House Owner</option>
+                                    <option value="renter">House Renter</option>
                                 </select>
                             </div>
                             <div className="form-control">

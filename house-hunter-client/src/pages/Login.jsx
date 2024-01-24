@@ -1,15 +1,41 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { FaEyeSlash, FaEye } from 'react-icons/fa';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthProvider";
+import toast from "react-hot-toast";
+import useAxiosSecure from "../Hooks/UseAxiosSecure";
 
 const Login = () => {
     const [showPass, setShowPass] = useState(false)
+    const {emailLogin} = useContext(AuthContext)
+    const navigate = useNavigate()
+    const axiosSecure = useAxiosSecure()
 
-    const handleLogin = e =>{
+    const handleLogin = (e) =>{
         e.preventDefault()
         const email = e.target.email.value
         const password = e.target.password.value
-        console.log(email, password);
+
+        axiosSecure.get(`/users/${email}` )
+        .then(res =>{
+            const role = res.data.role
+            emailLogin(email , password)
+            .then(()=>{
+                if(role === "owner"){
+                    navigate("/dashboard/owner")
+                    return toast.success('Login successfully');
+                }else{
+                    navigate("/dashboard/renter")
+                    toast.success('Login successfully');
+                }
+                
+            })
+            .catch(() =>{
+                toast.error("Don't Match");
+            })
+        })
+
+        
     }
     return (
         <div>

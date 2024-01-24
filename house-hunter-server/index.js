@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+// const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
@@ -13,6 +14,13 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.13lfhki.mongodb.net/?retryWrites=true&w=majority`;
+// mongoose.connect(uri,{
+//   useNewUrlParser: true
+// }).then(()=>{
+//   console.log("Connected to database");
+// }).catch((error)=>{
+//   console.log(error);
+// })
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -26,7 +34,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const userCollection = client.db("houseHunterDB").collection("users");
     const houseCollection = client.db("houseHunterDB").collection("house");
 
@@ -55,9 +63,17 @@ async function run() {
         res.send({ token });
     });
 
+    
+
     // house
     app.get('/house', async(req, res)=>{
       const result = await houseCollection.find().toArray()
+      res.send(result)
+    })
+    app.get('/house/:id', async(req, res)=>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const result = await houseCollection.findOne(filter)
       res.send(result)
     })
     
@@ -66,7 +82,102 @@ async function run() {
       const result = await houseCollection.insertOne(house)
       res.send(result)
     })
+
+    app.patch('/house/:id', async(req, res) =>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert: true}
+      const updatedProducts = req.body
+      const updateDoc = {
+          $set:{
+
+            name:updatedProducts.name, 
+            description:updatedProducts.description,
+            city:updatedProducts.city, 
+            image:updatedProducts.image, 
+            bedrooms:updatedProducts.bedrooms, 
+            bathroom:updatedProducts.bathroom,
+            size:updatedProducts.size,
+            rent:updatedProducts.rent,
+            phoneNumber:updatedProducts.phoneNumber,
+            date:updatedProducts.date,
+            email:updatedProducts.email,
+          }
+      } 
+      const result = await houseCollection.updateOne(filter, updateDoc, options)
+      res.send(result)
+
+  })
+          // name,
+          //   description,
+          //   city,
+          //   image,
+          //   bedrooms,
+          //   bathroom,
+          //   size,
+          //   rent,
+          //   phoneNumber,
+          //   date,
+          //   email: user.email
+
+    app.delete('/house/:id', async(req, res)=>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const result = await houseCollection.deleteOne(filter)
+      res.send(result)
+    })
     
+
+    // user
+    app.get('/users/:email', async(req, res)=>{
+      const email = req.params.email
+      const filter = {email: email}
+      const result = await userCollection.findOne(filter)
+      res.send(result)
+    })
+
+    app.post('/users', async(req, res)=>{
+      const user = req.body
+      const query = {email: user.email}
+      const existingUser = await userCollection.findOne(query)
+      if(existingUser){
+        return res.send({error: 'user already exists'})
+      }
+      
+      const result = await userCollection.insertOne(user)
+      res.send(result)
+    })
+    
+    app.get('/users/owner/:email', verifyToken, async(req, res)=>{
+      const email = req.params.email
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'Unauthorized'})
+      }
+      const query = {email: email}
+      const user = await userCollection.findOne(query)
+      let owner = false
+      if(user){
+        owner = user?.role === 'owner'
+      }
+      res.send({owner});
+    })
+
+    app.get('/users/renter/:email', verifyToken, async(req, res)=>{
+      const email = req.params.email
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: 'Unauthorized'})
+      }
+      const query = {email: email}
+      const user = await userCollection.findOne(query)
+      let renter = false
+      if(user){
+        renter = user?.role === 'renter'
+      }
+      res.send({renter});
+    })
+
+    
+
 
     
 
@@ -89,3 +200,7 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`House Hunter App Running on port ${port}`);
 });
+
+
+
+

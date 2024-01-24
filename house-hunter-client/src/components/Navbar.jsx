@@ -1,24 +1,40 @@
 import { Link, NavLink } from "react-router-dom";
 import { FiLogIn, FiLogOut } from "react-icons/fi";
+import useOwner from "../Hooks/useOwner";
+import useRenter from "../Hooks/useRenter";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 
 const Navbar = () => {
-    
+    const { user, userLogOut } = useContext(AuthContext)
+    const [isOwner] = useOwner()
+    const [isRenter] = useRenter()
     
     const menu = (
         <>
-        
             <NavLink to="/" className={({ isActive, isPending }) =>
                 isActive ? " text-[#00917c] underline" : isPending ? "pending" : ""}>
                 <li className="font-bold px-3 py-2">Home</li>
             </NavLink>
 
-            <NavLink to="/dashboard" className={({ isActive, isPending }) =>
+            { isOwner &&
+                <NavLink to="/dashboard/owner" className={({ isActive, isPending }) =>
                 isActive ? "text-[#00917c] underline" : isPending ? "pending" : ""}>
-                <li className="font-bold px-3 py-2">Dashboard</li>
-            </NavLink>
-
+                    <li className="font-bold px-3 py-2">Dashboard</li>
+                </NavLink>
+            }
+            { isRenter &&
+                <NavLink to="/dashboard/renter" className={({ isActive, isPending }) =>
+                isActive ? "text-[#00917c] underline" : isPending ? "pending" : ""}>
+                    <li className="font-bold px-3 py-2">Dashboard</li>
+                </NavLink>
+            }
         </>
 )
+
+const handleLogout = ()=>{
+    userLogOut()
+}
     return (
         <div className="container mx-auto py-2">
             <div className="navbar">
@@ -41,14 +57,22 @@ const Navbar = () => {
                     </ul>
                 </div>
                 <div className="navbar-end">
+                    {
+                        user ? 
+                        <button onClick={handleLogout} className="btn btn-sm  btn-error font-semibold text-white"><FiLogOut className=" text-base "/>Logout</button>
+                        :
+                        <Link to='/login'>
+                            <button className="btn btn-sm  btn-success font-semibold text-white"><FiLogIn className=" text-base "/>Login</button>
+                        </Link>
+                        
+                    }
                     
-                            <Link to='/login'>
+                            {/* <Link to='/login'>
                                 <button className="btn btn-sm  btn-error font-semibold text-white"><FiLogOut className=" text-base "/>Logout</button>
                             </Link>
                             <Link to='/login'>
                                 <button className="btn btn-sm  btn-success font-semibold text-white"><FiLogIn className=" text-base "/>Login</button>
-                            </Link>
-                    
+                            </Link> */}
                 </div>
             </div>
         </div>
