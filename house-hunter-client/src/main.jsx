@@ -50,7 +50,7 @@ const router = createBrowserRouter([
       {
         path: "owner/update/:id",
         element: <EditHouse></EditHouse>,
-        loader: ({params})=> fetch(`http://localhost:5000/update/${params.id}`)
+        loader: ({params})=> fetch(`https://house-hunter-server-bice.vercel.app/update/${params.id}`)
       },
       {
         path: "renter",
