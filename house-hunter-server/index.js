@@ -37,6 +37,7 @@ async function run() {
     // await client.connect();
     const userCollection = client.db("houseHunterDB").collection("users");
     const houseCollection = client.db("houseHunterDB").collection("house");
+    const bookingCollection = client.db("houseHunterDB").collection("bookings");
 
     // middleware
     const verifyToken = (req, res, next) => {
@@ -107,18 +108,7 @@ async function run() {
       const result = await houseCollection.updateOne(filter, updateDoc, options)
       res.send(result)
 
-  })
-          // name,
-          //   description,
-          //   city,
-          //   image,
-          //   bedrooms,
-          //   bathroom,
-          //   size,
-          //   rent,
-          //   phoneNumber,
-          //   date,
-          //   email: user.email
+    })
 
     app.delete('/house/:id', async(req, res)=>{
       const id = req.params.id
@@ -175,6 +165,25 @@ async function run() {
       }
       res.send({renter});
     })
+
+    // Bookings
+    app.get('/bookings', async(req, res)=>{
+      const result = await bookingCollection.find().toArray()
+      res.send(result)
+    })
+    app.post('/bookings', async(req, res)=>{
+      const house = req.body
+      const result = await bookingCollection.insertOne(house)
+      res.send(result)
+    })
+    app.delete('/bookings/:id', async(req, res)=>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const result = await bookingCollection.deleteOne(filter)
+      res.send(result)
+    })
+
+
 
     
 

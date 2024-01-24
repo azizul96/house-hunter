@@ -19,7 +19,7 @@ const Dashboard = () => {
                         <img className="object-cover w-20 h-20 border-2 border-[#8a50fb] rounded-full "src={`/user.png`} alt="avatar" />
                         
                     </div>
-                    <p className="font-semibold text-white text-xl text-center mb-10"> Hello </p>
+                    <p className="font-semibold text-white text-xl text-center mb-10"> Hello there!</p>
                     <div className='px-4 mb-4 '>
                         { isOwner && 
                             <>

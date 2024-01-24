@@ -38,7 +38,7 @@ const Owner = () => {
                 if(res.data.deletedCount > 0){
                     Swal.fire({
                         title: "Deleted!",
-                        text: "Employee data has been Deleted.",
+                        text: "House has been Deleted.",
                         icon: "success"
                     });
                     refetch()
@@ -50,6 +50,7 @@ const Owner = () => {
     }
   return (
     <div>
+        <h1 className="text-2xl text-center font-bold p-4 bg-rose-600 text-white rounded-md mb-1">All Listed Home </h1>
       <div className="overflow-x-auto rounded-md">
         <table className="table ">
           {/* head */}

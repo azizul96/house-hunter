@@ -1,9 +1,88 @@
 import { FaBath, FaBed, FaBuilding, FaCalendar, FaPhone } from "react-icons/fa";
+import useRenter from "../Hooks/useRenter";
+import useOwner from "../Hooks/useOwner";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
+import useAxiosPublic from "../Hooks/useAxiosPublic";
+import Swal from "sweetalert2";
 
 const HouseCard = ({ house }) => {
+    const {name,
+        description,
+        city,
+        image,
+        bedrooms,
+        bathroom,
+        size,
+        rent,
+        phoneNumber,
+        date} = house
+    const {user} = useContext(AuthContext)
+    const [isRenter] = useRenter()
+    const [isOwner] = useOwner()
+    const axiosPublic = useAxiosPublic()
     console.log(house);
 
+    const handleBook= (id)=>{
+        console.log(id);
+        const houseInfo = {
+            name,
+            description,
+            city,
+            image,
+            bedrooms,
+            bathroom,
+            size,
+            rent,
+            phoneNumber,
+            date,
+            email: user.email
+        }
 
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You want to Book!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Book!"
+          }).then((result) => {
+
+            if (result.isConfirmed) {
+            axiosPublic.get(`/bookings`)
+            .then( res => {
+                if(res.data.length < 2){
+                    axiosPublic.post(`/bookings`, houseInfo)
+                    .then(res =>{
+                        console.log(res.data);
+                        if(res.data.insertedId){
+                            Swal.fire({
+                                title: "Booked!",
+                                text: "House has been Booked.",
+                                icon: "success"
+                            });
+                        }
+                        
+                        
+                    })
+                    }
+                    else{
+                        Swal.fire({
+                            title: "Limit Reached!",
+                            text: "House Booking Limit Reached.",
+                            icon: "error"
+                        });
+                    }
+                    });
+                }
+                
+                
+            })
+            
+
+    }
     return (
         <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800">
             <img className="object-cover object-center w-full h-56" src={house.image} alt="avatar"/>
@@ -48,7 +127,14 @@ const HouseCard = ({ house }) => {
                     <h1 className="px-2 text-sm">Available: {house.date} </h1>
                 </div>
                 <div className="flex justify-center items-center mt-4">
-                    <button className="btn btn-success btn-sm rounded-full text-white ">Book Now</button>
+                    {
+                        isRenter && 
+                        <button onClick={()=>handleBook(house._id)} className="btn btn-success btn-sm rounded-full text-white ">Book Now</button>
+                    }
+                    {
+                        isOwner &&
+                        <button className="btn btn-success btn-sm rounded-full text-white  " disabled>Book Now</button>
+                    }
                 </div>
             </div>
         </div>
